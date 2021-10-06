@@ -1,6 +1,6 @@
-module github.com/ausmartway/tfc-env-variable-scanner
+module github.com/ausmartway/tfcvar-sec
 
-go 1.16
+go 1.17
 
 require (
 	github.com/TwinProduction/go-color v1.0.0
