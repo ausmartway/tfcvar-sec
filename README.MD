@@ -31,14 +31,14 @@ provider "aws" {
   secret_key = var.aws_secret_key
 }
 ```
-This method is an improvement to hardcoding secrets, as the values of terraform variable don't have to be stored in the code. They can be provided by the CI/CD pipeline at runtime. However this method has it's own risk, as the credentials are provided as terraform variable, it's value will be accessble by terraform code, for example:
+This method is an improvement to hardcoding secrets, as the values of terraform variable don't have to be stored in the code. They can be configured in Terraform Cloud. However this method has it's own risk, as the credentials are provided as terraform variable, it's value will be accessble by terraform code, for example:
 
 ```terraform
 output "aws_credentials" {
     value = "aws_access_key=${var.aws_access_key}\naws_secret_key=${var.aws_secret_key}"
 }
 ```
-Terraform variables can be further secured by marking terraform variable [sensitive](https://learn.hashicorp.com/tutorials/terraform/sensitive-variables), but it still relies on the practitioner and administrators to enforce good coding practise. 
+Terraform variables can be further secured by marking terraform variable [sensitive](https://learn.hashicorp.com/tutorials/terraform/sensitive-variables), but it still relies on the practitioner and administrators to enforce good coding practise, eg, be very careful with [nonsensitive](https://www.terraform.io/docs/language/functions/nonsensitive.html) function.
 
 ### using Enviroment Variables to configure provider credentials
 
@@ -52,13 +52,13 @@ provider "aws" {
   region     = "us-west-2"
 }
 ```
-Enviroment variables are more secure than terraform variables, as they can not be referenced by any terraform code. Enviroment variables also have fixed name per provider, which makes it easy to identify them.
+Enviroment variables are more secure than terraform variables, as they can not be referenced by any terraform code. Enviroment variables also have fixed name per provider, which makes it easy to be identified.
 
 ### using IAM roles/Instance Profiles, etc
-Running Terraform cli on the cloud, and use predefined IAM roles. There is no credential involved, but this will only work with one major providers.
+Running Terraform cli on the cloud, and use predefined IAM roles. There is no credential involved, but this will only work with one major providers - you can't use aws IAM role to provision on gcp, or vice versa.
 
 ## Conclusion
-Based on above, providing provider credentials via Enviroment variables perhaps the most widely used and most secure way. It still relies on TFC admins making those that could contain secrets sensitive.
+Based on above, providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way. It still relies on TFC admins making those that could contain secrets sensitive.
 
 tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
