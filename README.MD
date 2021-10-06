@@ -1,7 +1,6 @@
 # tfcvar-sec
 
 ## TLDR
-
 tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
 ## Summary
@@ -53,7 +52,7 @@ provider "aws" {
   region     = "us-west-2"
 }
 ```
-Enviroment variables are more secure than terraform variables, as they can not be referenced by any terraform code.
+Enviroment variables are more secure than terraform variables, as they can not be referenced by any terraform code. Enviroment variables also have fixed name per provider, which makes it easy to identify them.
 
 ### using IAM roles/Instance Profiles, etc
 Running Terraform cli on the cloud, and use predefined IAM roles. There is no credential involved, but this will only work with one major providers.
@@ -62,6 +61,12 @@ Running Terraform cli on the cloud, and use predefined IAM roles. There is no cr
 Based on above, providing provider credentials via Enviroment variables perhaps the most widely used and most secure way. It still relies on TFC admins making those that could contain secrets sensitive.
 
 tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
+
+Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify them. Enviroment variables identified by tfcvar-sec will be printed as Red.
+
+Credentials provided to terraform providers via terraform variable is harder to identify, as the variable names can be customised. tfcvar-sec just do a best effort guess based on name of the variable. Identified terraform variables will be printed as Yellow.
+
+Terraform variable values can also be provided as enviroment variable, eg TF_VAR_varname, they will be printed as Yellow as well.
 
 ## Installation
 The binaries can be found in [releases](https://github.com/ausmartway/tfcvar-sec/releases).
