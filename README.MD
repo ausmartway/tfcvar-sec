@@ -37,7 +37,7 @@ output "aws_credentials" {
     value = "aws_access_key=${var.aws_access_key}\naws_secret_key=${var.aws_secret_key}"
 }
 ```
-Terraform variables can be further secured by marking terraform variable [sensitive](https://learn.hashicorp.com/tutorials/terraform/sensitive-variables), but it relies on the practitioner and administrators to enforce good coding practise. 
+Terraform variables can be further secured by marking terraform variable [sensitive](https://learn.hashicorp.com/tutorials/terraform/sensitive-variables), but it still relies on the practitioner and administrators to enforce good coding practise. 
 
 ### using Enviroment Variables to configure provider credentials
 
@@ -53,8 +53,20 @@ provider "aws" {
 ```
 Enviroment variables are more secure than terraform variables, as they can not be referenced by any terraform code.
 
-### using IAM roles
-Running Terraform cli on the cloud, and 
+### using IAM roles/Instance Profiles, etc
+Running Terraform cli on the cloud, and use predefined IAM roles. There is no credential involved, but this will only work with one major providers.
+
+## Conclusion
+Based on above, providing provider credentials via Enviroment variables perhaps the most widely used and most secure way. It still relies on TFC admins making those that could contain secrets sensitive.
+
+tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
+
+## Installation
+The binaries can be found in [releases](https://github.com/ausmartway/tfcvar-sec/releases).
+
+## Colaboration
+Please raise issues or pull request if you want to add to the list, providing the URL to provider documents.
+
 
 
 
