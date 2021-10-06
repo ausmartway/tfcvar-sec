@@ -125,6 +125,9 @@ var sensitiveEnvVariables = map[string]bool{
 	"DD_API_KEY": true,
 	"DD_APP_KEY": true,
 
+	//Docker
+	"DOCKER_REGISTRY_PASS": true,
+
 	//Gitlab
 	"GITLAB_TOKEN": true,
 
@@ -164,6 +167,9 @@ var sensitiveEnvVariables = map[string]bool{
 
 	//1Password
 	"OP_CONNECT_TOKEN": true,
+
+	//Linode
+	"LINODE_TOKEN": true,
 }
 
 //flat structure
@@ -247,14 +253,14 @@ func main() {
 					for _, wsVar := range variables.Items {
 						switch wsVar.Category {
 						case "env":
-							if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive {
+							if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
 								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
-							} else if !wsVar.Sensitive && strings.Index(wsVar.Key, "TF_VAR_") == 0 {
+							} else if !wsVar.Sensitive && strings.Index(wsVar.Key, "TF_VAR_") == 0 { //if it is TF_VAR_something style
 								tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
 								if contains(strings.ToLower(tt), sensitiveTfcVariablePattens) {
 									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 								}
-							} //should add else to handle TF_VAR_var style env variables
+							}
 						case "terraform":
 							if !wsVar.Sensitive && contains(strings.ToLower(wsVar.Key), sensitiveTfcVariablePattens) {
 								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
