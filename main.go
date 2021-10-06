@@ -176,21 +176,6 @@ type varVialation struct {
 
 var varVialations []varVialation
 
-// //layered structure
-// type category struct {
-// 	name      string
-// 	variables []string
-// }
-// type workspace struct {
-// 	name string
-// 	cat  []category
-// }
-
-// type org struct {
-// 	name      string
-// 	workspace workspace
-// }
-
 func newVarVialation(orgName string, workspaceName string, category string, varName string) *varVialation {
 	p := varVialation{workspaceName: workspaceName}
 	p.varName = varName
