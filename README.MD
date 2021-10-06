@@ -71,6 +71,11 @@ Terraform variable values can also be provided as enviroment variable, eg TF_VAR
 ## Installation
 The binaries can be found in [releases](https://github.com/ausmartway/tfcvar-sec/releases).
 
+## usage
+tfcvar-sec only works with Terraform Cloud for now. You need a Terraform Cloud token which will be used by tfcvar-sec to find all orgnizations,workspaces and variables. eg:
+```bash
+TFE_TOKEN=YOUR.atlasv1.TFE_TOKEN_PERSONAL_OR_ORGNISATION  tfcvar-sec
+```
 ## Colaboration
 Please raise issues or pull request if you want to add to the list, providing the URL to provider documents.
 
