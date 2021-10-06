@@ -1,7 +1,7 @@
 # tfcvar-sec
 
 ## TLDR
-tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
+tfcvar-sec is a tool that scans terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
 ## Summary
 As the most popular Infrastructure as Code tool(or one of), Terraform helps in configuring, provisioning, and managing the infrastructure accross 400+ providers. The first thing Terraform needs is the credential so that it can interact with the provider's API. The credentials used by terraform are generally priviliged so that terraform can create/update/destroy resources. It is very important to keep those credentials secure.
