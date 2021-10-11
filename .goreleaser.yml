@@ -13,8 +13,10 @@ builds:
       - linux
       - windows
       - darwin
+    goarch:
+      - amd64
     ldflags:
-      - -X github.com/ausmartway/tfcvar-sec/version.Version={{.Tag}} -X github.com/ausmartway/tfcvar-sec/version.PackageManager=goreleaser
+      - -X version.Version={{.Tag}} -X version.PackageManager=goreleaser
 archives:
   - replacements:
       darwin: darwin
