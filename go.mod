@@ -35,6 +35,4 @@ require (
 require (
 	github.com/TwiN/go-color v1.0.1
 	github.com/hashicorp/go-tfe v0.19.0
-	github.com/hashicorp/go-version v1.3.0 // indirect
-	github.com/sirupsen/logrus v1.8.1 // indirect
 )
