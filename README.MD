@@ -10,6 +10,46 @@ As the most popular Infrastructure as Code tool(or one of), Terraform helps in c
 
 Terraform Cloud is a secure/reliable and governed IaC pipeline that helps teams use Terraform cli all together. It provides a means for practitioner to store their credentials as terraform or enviroment variable, which can be marked as sensitive. Sensitive variables are encrypted and not readable by any practitioner.
 
+## Conclusion
+
+Providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way(different ways of providing provider credentials can be found at the end of this Readme). It still relies on TFC admins making those that could contain secrets sensitive.
+
+tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
+
+Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify them. Enviroment variables identified by tfcvar-sec will be printed as Red.
+
+Credentials provided to terraform providers via terraform variable is harder to identify, as the variable names can be customised. tfcvar-sec just do a best effort guess based on name of the variable. Identified terraform variables will be printed as Yellow.
+
+Terraform variable values can also be provided as enviroment variable, eg TF_VAR_varname, those will be printed as Yellow as well.
+
+## Installation
+
+The binaries can be found in [releases](https://github.com/ausmartway/tfcvar-sec/releases).
+
+## usage
+
+tfcvar-sec only works with Terraform Cloud for now. You need a Terraform Cloud token which will be used by tfcvar-sec to find all orgnizations,workspaces and variables. eg:
+
+```bash
+TFE_TOKEN=YOUR.atlasv1.TFE_TOKEN  tfcvar-sec scan
+```
+
+or
+
+```bash
+tfcvar-sec scan --token YOUR.atlasv1.TFE_TOKEN
+```
+
+tfcvar-sec will read Terraform Cloud credentials file if no tokens are provided via cli or enviroment variable. This is $HOME/.terraform.d/credentials.tfrc.json by default. eg:
+
+```bash
+tfcvar-sec scan
+```
+
+## Colaboration
+
+Please raise issues or pull request if you want to add to the list, providing the URL to related provider documents.
+
 ## Different ways of providing credentials to Terraform Providers
 
 The provider credentials can be provided to Terraform by several means. Below are a few different ways of configuring credential for the most popular Terraform provider, aws:
@@ -66,31 +106,3 @@ Enviroment variables are more secure than terraform variables, as they can not b
 ### using IAM roles/Instance Profiles, etc
 
 Running Terraform cli on the cloud, and use predefined IAM roles. There is no credential involved, but this will only work with one major providers - you can't use aws IAM role to provision on gcp, or vice versa.
-
-## Conclusion
-
-Based on above, providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way. It still relies on TFC admins making those that could contain secrets sensitive.
-
-tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
-
-Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify them. Enviroment variables identified by tfcvar-sec will be printed as Red.
-
-Credentials provided to terraform providers via terraform variable is harder to identify, as the variable names can be customised. tfcvar-sec just do a best effort guess based on name of the variable. Identified terraform variables will be printed as Yellow.
-
-Terraform variable values can also be provided as enviroment variable, eg TF_VAR_varname, they will be printed as Yellow as well.
-
-## Installation
-
-The binaries can be found in [releases](https://github.com/ausmartway/tfcvar-sec/releases).
-
-## usage
-
-tfcvar-sec only works with Terraform Cloud for now. You need a Terraform Cloud token which will be used by tfcvar-sec to find all orgnizations,workspaces and variables. eg:
-
-```bash
-TFE_TOKEN=YOUR.atlasv1.TFE_TOKEN_PERSONAL_OR_ORGNISATIONAL  tfcvar-sec
-```
-
-## Colaboration
-
-Please raise issues or pull request if you want to add to the list, providing the URL to provider documents.
