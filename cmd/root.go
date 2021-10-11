@@ -57,5 +57,6 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Prints the Doormat CLI version")
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 }
