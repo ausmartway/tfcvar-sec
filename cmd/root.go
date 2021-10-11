@@ -21,7 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ausmartway/tfcvar-sec/version"
+	"version"
 )
 
 // rootCmd represents the base command when called without any subcommands
