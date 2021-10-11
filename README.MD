@@ -22,6 +22,10 @@ Credentials provided to terraform providers via terraform variable is harder to 
 
 Terraform variable values can also be provided as enviroment variable, eg TF_VAR_varname, those will be printed as Yellow as well.
 
+Below is an example output:
+
+![tfcvar-sec](https://raw.githubusercontent.com/ausmartway/tfcvar-sec/main/png/tfcvar-sec.png)
+
 ## Installation
 
 The binaries can be found in [releases](https://github.com/ausmartway/tfcvar-sec/releases).
