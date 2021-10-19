@@ -95,7 +95,7 @@ brew install tfcvar-sec
 ### Linux
 
 ```bash
-curl -L https://raw.githubusercontent.com/ausmartway/tfcvar-sec/release/install.sh | bash
+curl -L https://raw.githubusercontent.com/ausmartway/tfcvar-sec/main/install.sh | bash
 ```
 
 ### Windows
