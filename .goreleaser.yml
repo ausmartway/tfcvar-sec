@@ -27,6 +27,8 @@ builds:
         goarch: arm
     ldflags:
       - -X version.Version={{.Tag}} -X version.PackageManager=goreleaser
+universal_binaries:
+- replace: true
 
 dockers:
 - image_templates:
