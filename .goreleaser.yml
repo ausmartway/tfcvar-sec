@@ -43,7 +43,7 @@ brews:
   # GitHub/GitLab repository to push the formula to
     tap:
       owner: ausmartway
-      name: tfcvar-sec
+      name: homebrew-tfcvar-sec
     # Git author used to commit to the repository.
     # Defaults are shown.
     commit_author:
