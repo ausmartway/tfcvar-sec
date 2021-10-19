@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/TwiN/go-color"
@@ -251,7 +252,11 @@ func initConfig() {
 			// Find home directory.
 			home, err := os.UserHomeDir()
 			cobra.CheckErr(err)
-			home = home + "/.terraform.d/"
+			if runtime.GOOS == "windows" {
+				home = home + "\\terraform.d\\"
+			} else if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+				home = home + "/.terraform.d/"
+			}
 
 			// Search config in home directory with name "credentials.tfrc.json".
 			viper.AddConfigPath(home)
