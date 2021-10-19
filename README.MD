@@ -130,8 +130,8 @@ If you have docker, you can use below command(replace the token with your own):
 
 ```bash
 docker run --rm -ti --env \
-TFE_TOKEN=9FHlEvrQW2KcJQ.atlasv1.2Ekzw0RzaPsNw6ZRv8lzhZGobW8ugdohIheOlKPRU9eyTMmFjBEryjyXfpjs24a2ap4 \
-ausmartway/tfcvar-sec tfcvar-sec scan
+TFE_TOKEN=YOUROWNTOKEN \
+ausmartway/tfcvar-sec scan
 ```
 
 ## Colaboration
