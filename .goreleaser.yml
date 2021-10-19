@@ -25,14 +25,15 @@ builds:
 dockers:
 - image_templates:
   - "ausmartway/tfcvar-sec:latest"
-  - "ausmartway/tfcvar-sec:{{ .Version }}"
+  - "ausmartway/tfcvar-sec:{{ .Version }}-amd64"
   use: buildx
   dockerfile: Dockerfile
   build_flag_templates:
   - "--platform=linux/amd64"
+
 - image_templates:
   - "ausmartway/tfcvar-sec:latest"
-  - "ausmartway/tfcvar-sec:{{ .Version }}"
+  - "ausmartway/tfcvar-sec:{{ .Version }}-arm64"
   use: buildx
   goarch: arm64
   dockerfile: Dockerfile
@@ -41,7 +42,8 @@ dockers:
 docker_manifests:
 - name_template: ausmartway/tfcvar-sec:{{ .Version }}
   image_templates:
-  - ausmartway/tfcvar-sec:{{ .Version }}
+  - ausmartway/tfcvar-sec:{{ .Version }}-amd64
+  - ausmartway/tfcvar-sec:{{ .Version }}-arm64
 
 archives:
   - replacements:
