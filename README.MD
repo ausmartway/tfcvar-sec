@@ -4,7 +4,7 @@
 
 tfcvar-sec is a tool that scans terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
-## The problem space
+## The problem
 
 As the most popular Infrastructure as Code tool(or one of), Terraform helps in configuring, provisioning, and managing the infrastructure accross 400+ providers. The first thing Terraform needs is the credential so that it can interact with the provider's API. The credentials used by terraform are generally priviliged so that terraform can create/update/destroy resources. It is very important to keep those credentials secure.
 
@@ -46,7 +46,7 @@ output "aws_credentials" {
 
 Terraform variables can be further secured by marking terraform variable [sensitive](https://learn.hashicorp.com/tutorials/terraform/sensitive-variables), but it still relies on the practitioner and administrators to enforce good coding practise, eg, be very careful with [nonsensitive](https://www.terraform.io/docs/language/functions/nonsensitive.html) function.
 
-#### using Enviroment Variables to configure provider credentials
+#### Enviroment Variables
 
 ```bash
 export AWS_ACCESS_KEY_ID=my_aws_access_key
@@ -69,7 +69,7 @@ Running Terraform cli on the cloud, and use predefined IAM roles. There is no cr
 
 ## The solution
 
-Providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way(different ways of providing provider credentials can be found at the end of this Readme). It still relies on TFC admins making those that could contain secrets sensitive.
+Based on above, providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way(different ways of providing provider credentials can be found at the end of this Readme). It still relies on TFC admins making those that could contain secrets sensitive.
 
 tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 

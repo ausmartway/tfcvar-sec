@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/TwiN/go-color"
 	"github.com/spf13/cobra"
 
 	"version"
@@ -30,8 +31,7 @@ var (
 	rootCmd     = &cobra.Command{
 		Use:   "tfcvar-sec",
 		Short: "tfcvar-sec is a tool that scanns Terraform Cloud for insecure terraform/enviroment variables.",
-		Long: `tfcvar-sec is a tool that scanns Terraform Cloud for insecure terraform/enviroment variables. 
-Insecure enviroment variables are printed in Red with high level of confidence, terraform variables are guess work hence printed in Yellow.`,
+		Long:  "tfcvar-sec is a tool that scanns Terraform Cloud for insecure terraform/enviroment variables.\n" + "Insecure enviroment variables are printed in " + color.Red + "Red" + color.Reset + " or " + color.Yellow + "Yellow" + color.Reset + " based on confidence level.",
 
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
