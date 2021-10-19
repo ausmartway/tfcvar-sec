@@ -85,7 +85,22 @@ Below is an example output:
 
 ## Installation
 
-The binaries can be found in [releases](https://github.com/ausmartway/tfcvar-sec/releases).
+### Macos
+
+```bash
+brew tap ausmartway/tfcvar-sec
+brew install tfcvar-sec
+```
+
+### Linux
+
+```bash
+curl -L https://raw.githubusercontent.com/warrensbox/terraform-switcher/release/install.sh | bash
+```
+
+### Windows
+
+Download from [releases](https://github.com/ausmartway/tfcvar-sec/releases), unzip and copy to system PATH.
 
 ## usage
 
