@@ -95,8 +95,10 @@ brew install tfcvar-sec
 ### Linux
 
 ```bash
-curl -L https://raw.githubusercontent.com/ausmartway/tfcvar-sec/main/install.sh | bash
+curl -L https://raw.githubusercontent.com/ausmartway/tfcvar-sec/main/install.sh | sudo bash
 ```
+
+Please note that sudo is required so that tfcvar-sec can be installed into /usr/local/bin directory
 
 ### Windows
 
