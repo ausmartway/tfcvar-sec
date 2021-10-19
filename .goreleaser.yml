@@ -28,7 +28,7 @@ builds:
     ldflags:
       - -X version.Version={{.Tag}} -X version.PackageManager=goreleaser
 universal_binaries:
-- replace: true
+- replace: false
 
 dockers:
 - image_templates:
