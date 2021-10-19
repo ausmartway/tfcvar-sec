@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"os"
 
+	"version"
+
 	"github.com/TwiN/go-color"
 	"github.com/spf13/cobra"
-
-	"version"
 )
 
 // rootCmd represents the base command when called without any subcommands
