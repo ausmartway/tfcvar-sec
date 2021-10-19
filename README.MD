@@ -117,7 +117,7 @@ TFE_TOKEN=YOUR.atlasv1.TFE_TOKEN  tfcvar-sec scan
 or
 
 ```bash
-tfcvar-sec scan --token YOUR.atlasv1.TFE_TOKEN
+tfcvar-sec scan --token YOUROWNTOKEN
 ```
 
 tfcvar-sec will read Terraform Cloud credentials file if no tokens are provided via cli or enviroment variable. This is $HOME/.terraform.d/credentials.tfrc.json by default. eg:
@@ -132,6 +132,13 @@ If you have docker, you can use below command(replace the token with your own):
 docker run --rm -ti --env \
 TFE_TOKEN=YOUROWNTOKEN \
 ausmartway/tfcvar-sec scan
+```
+
+or
+
+```bash
+docker run --rm -ti ausmartway/tfcvar-sec scan \
+--token YOUROWNTOKEN
 ```
 
 ## Colaboration

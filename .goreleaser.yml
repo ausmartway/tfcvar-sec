@@ -16,8 +16,14 @@ builds:
     goarch:
       - amd64
       - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
     ignore:
       - goos: windows
+        goarch: arm
+      - goos: darwin
         goarch: arm
     ldflags:
       - -X version.Version={{.Tag}} -X version.PackageManager=goreleaser
@@ -40,11 +46,29 @@ dockers:
   build_flag_templates:
   - "--platform=linux/arm64/v8"
 
+- image_templates:
+  - "ausmartway/tfcvar-sec:latest"
+  - "ausmartway/tfcvar-sec:{{ .Version }}-armv7"
+  use: buildx
+  dockerfile: Dockerfile
+  build_flag_templates:
+  - "--platform=linux/arm/v7"
+
+- image_templates:
+  - "ausmartway/tfcvar-sec:latest"
+  - "ausmartway/tfcvar-sec:{{ .Version }}-armv6"
+  use: buildx
+  dockerfile: Dockerfile
+  build_flag_templates:
+  - "--platform=linux/arm/v6"
+
 docker_manifests:
 - name_template: ausmartway/tfcvar-sec:latest
   image_templates:
   - ausmartway/tfcvar-sec:{{ .Version }}-amd64
   - ausmartway/tfcvar-sec:{{ .Version }}-arm64
+  - ausmartway/tfcvar-sec:{{ .Version }}-armv7
+  - ausmartway/tfcvar-sec:{{ .Version }}-armv6
 
 archives:
   - replacements:
