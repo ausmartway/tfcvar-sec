@@ -41,9 +41,7 @@ dockers:
 docker_manifests:
 - name_template: ausmartway/tfcvar-sec:{{ .Version }}
   image_templates:
-  - ausmartway/tfcvar-sec:{{ .Version }}-amd64
-  - ausmartway/tfcvar-sec:{{ .Version }}-arm64v8
-
+  - ausmartway/tfcvar-sec:{{ .Version }}
 
 archives:
   - replacements:
