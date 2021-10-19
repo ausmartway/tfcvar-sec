@@ -243,19 +243,23 @@ func contains(str string, substrlist []string) bool {
 
 // initConfig reads in credential file and ENV variables if set.
 func initConfig() {
+	var home string
+	var err error
 
 	if token == "" {
 		if os.Getenv("TFE_TOKEN") != "" {
 			fmt.Fprintln(os.Stderr, "Using enviroment varialbe TFE_TOKEN")
 			token = os.Getenv("TFE_TOKEN")
 		} else {
-			// Find home directory.
-			home, err := os.UserHomeDir()
-			cobra.CheckErr(err)
+			// Find config directory.
 			if runtime.GOOS == "windows" {
+				home, err = os.UserConfigDir()
 				home = home + "\\terraform.d\\"
+				cobra.CheckErr(err)
 			} else if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+				home, err = os.UserHomeDir()
 				home = home + "/.terraform.d/"
+				cobra.CheckErr(err)
 			}
 
 			// Search config in home directory with name "credentials.tfrc.json".
