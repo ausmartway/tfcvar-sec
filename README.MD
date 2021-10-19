@@ -85,6 +85,8 @@ Below is an example output:
 
 ## Installation
 
+Note that you don't have to install tfcvar-sec if you have docker. please see usage section for details.
+
 ### Macos
 
 ```bash
@@ -122,6 +124,14 @@ tfcvar-sec will read Terraform Cloud credentials file if no tokens are provided 
 
 ```bash
 tfcvar-sec scan
+```
+
+If you have docker, you can use below command(replace the token with your own):
+
+```bash
+docker run --rm -ti --env \
+TFE_TOKEN=9FHlEvrQW2KcJQ.atlasv1.2Ekzw0RzaPsNw6ZRv8lzhZGobW8ugdohIheOlKPRU9eyTMmFjBEryjyXfpjs24a2ap4 \
+ausmartway/tfcvar-sec tfcvar-sec scan
 ```
 
 ## Colaboration
