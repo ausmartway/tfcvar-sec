@@ -34,3 +34,49 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  -
+    # Name of the recipe
+    # Default to project name
+    name: tfcvar-sec
+
+  # GitHub/GitLab repository to push the formula to
+    tap:
+      owner: ausmartway
+      name: tfcvar-sec
+    # Git author used to commit to the repository.
+    # Defaults are shown.
+    commit_author:
+      name: Yulei Liu
+      email: yulei.liu@gmail.com
+
+    # Folder inside the repository to put the formula.
+    # Default is the root folder.
+    folder: Formula
+
+    # Caveats for the user of your binary.
+    # Default is empty.
+    caveats: "Type 'tfcvar-sec scan' on your command line."
+
+    # Your app's homepage.
+    # Default is empty.
+    homepage: "https://github.com/ausmartway/tfcvar-sec"
+
+    # Your app's description.
+    # Default is empty.
+    description: "The tfcvar-sec is a tool that scanns Terraform Cloud for insecure terraform/enviroment variables."
+
+    # Setting this will prevent goreleaser to actually try to commit the updated
+    # formula - instead, the formula file will be stored on the dist folder only,
+    # leaving the responsibility of publishing it to the user.
+    # Default is false.
+    skip_upload: false
+
+    # So you can `brew test` your formula.
+    # Default is empty.
+    test: |
+      system "#{bin}/tfcvar-sec --version"
+    # Custom install script for brew.
+    # Default is 'bin.install "program"'.
+    install: |
+      bin.install "tfcvar-sec"
