@@ -7,7 +7,7 @@ import (
 
 // Variables set at build time
 var (
-	Version        = "0.2.1"
+	Version        = "from-source"
 	PackageManager = "goreleaser"
 )
 
