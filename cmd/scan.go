@@ -32,18 +32,22 @@ import (
 const Hostname = "app.terraform.io"
 
 var token string
-var numOrg, numWorkspace, numVar, numCritical, numWarning int
+var fixCritical, fixWarning bool
+var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWarningFix int
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().StringVar(&token, "token", "", "Terraform Cloud/Enterprise personal/team/orgnisation token")
+	scanCmd.Flags().BoolVar(&fixCritical, "fixcritical", false, "Fix detected Critical variables by marking them sensitive, default to false")
+	scanCmd.Flags().BoolVar(&fixWarning, "fixwarning", false, "Fix detected Warning variables by marking them sensitive, default to false")
+
 }
 
 // scanCmd represents the scan command
 var scanCmd = &cobra.Command{
 	Use:   "scan",
-	Short: "Scans Terraform Cloud for sensitive varaibles",
-	Long:  `Scans Terraform Cloud for sensitive varaibles`,
+	Short: "Scans/fixes Terraform Cloud for sensitive varaibles",
+	Long:  `Scans/fixes Terraform Cloud for sensitive varaibles`,
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
 		scan(Hostname, token)
@@ -326,17 +330,44 @@ func scan(hostname string, token string) {
 							if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
 								numCritical = numCritical + 1
 								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+								if fixCritical {
+									numCriticalFix = numCriticalFix + 1
+									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+										Sensitive: tfe.Bool(true),
+									})
+									if err != nil {
+										fmt.Println(updateErr)
+									}
+								}
 							} else if !wsVar.Sensitive && strings.Index(wsVar.Key, "TF_VAR_") == 0 { //if it is TF_VAR_something style
 								tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
 								if contains(strings.ToLower(tt), sensitiveTfcVariablePattens) {
 									numWarning = numWarning + 1
 									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+									if fixWarning {
+										numWarningFix = numWarningFix + 1
+										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+											Sensitive: tfe.Bool(true),
+										})
+										if err != nil {
+											fmt.Println(updateErr)
+										}
+									}
 								}
 							}
 						case "terraform":
 							if !wsVar.Sensitive && contains(strings.ToLower(wsVar.Key), sensitiveTfcVariablePattens) {
 								numWarning = numWarning + 1
 								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+								if fixWarning {
+									numWarningFix = numWarningFix + 1
+									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+										Sensitive: tfe.Bool(true),
+									})
+									if err != nil {
+										fmt.Println(updateErr)
+									}
+								}
 							}
 
 						}
@@ -362,7 +393,32 @@ func scan(hostname string, token string) {
 		fmt.Printf("Total number of Orgnisations scanned: %d\n", numOrg)
 		fmt.Printf("Total number of Workspaces scanned: %d\n", numWorkspace)
 		fmt.Printf("Total number of Variables scanned: %d\n", numVar)
-		fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables detected:", numCritical)
-		fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables detected:", numWarning)
+		if fixCritical {
+			if numCriticalFix > 0 {
+				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables fixed:", numCriticalFix)
+			} else {
+				fmt.Println("No " + color.Red + "Critical" + color.Reset + " variables found, well done!")
+			}
+		} else {
+			if numCritical > 0 {
+				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables detected:", numCritical, ",you can run tfcvar-scan scan --fixcritical to get them fixed.")
+			} else {
+				fmt.Println("No " + color.Red + "Critical" + color.Reset + " variables found, well done!")
+			}
+		}
+
+		if fixWarning {
+			if numWarningFix > 0 {
+				fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables fixed:", numWarningFix)
+			} else {
+				fmt.Println("No " + color.Yellow + "Warning" + color.Reset + " variables found, well done!")
+			}
+		} else {
+			if numWarning > 0 {
+				fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables detected:", numWarning, ",you can run tfcvar-scan scan --fixwarning to get them fixed.")
+			} else {
+				fmt.Println("No " + color.Yellow + "Warning" + color.Reset + " variables found, well done!")
+			}
+		}
 	}
 }
