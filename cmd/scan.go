@@ -32,14 +32,14 @@ import (
 const Hostname = "app.terraform.io"
 
 var token string
-var fixCritial, fixWarning bool
+var fixCritical, fixWarning bool
 var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWarningFix int
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().StringVar(&token, "token", "", "Terraform Cloud/Enterprise personal/team/orgnisation token")
-	scanCmd.Flags().BoolVar(&fixCritial, "fixcritial", false, "Fix detected Critical variables by marking them sensitive, default to false")
-	scanCmd.Flags().BoolVar(&fixCritial, "fixwarning", false, "Fix detected Warning variables by marking them sensitive, default to false")
+	scanCmd.Flags().BoolVar(&fixCritical, "fixcritical", false, "Fix detected Critical variables by marking them sensitive, default to false")
+	scanCmd.Flags().BoolVar(&fixWarning, "fixwarning", false, "Fix detected Warning variables by marking them sensitive, default to false")
 
 }
 
@@ -330,7 +330,7 @@ func scan(hostname string, token string) {
 							if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
 								numCritical = numCritical + 1
 								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
-								if fixCritial {
+								if fixCritical {
 									numCriticalFix = numCriticalFix + 1
 									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
 										Sensitive: tfe.Bool(true),
@@ -393,7 +393,7 @@ func scan(hostname string, token string) {
 		fmt.Printf("Total number of Orgnisations scanned: %d\n", numOrg)
 		fmt.Printf("Total number of Workspaces scanned: %d\n", numWorkspace)
 		fmt.Printf("Total number of Variables scanned: %d\n", numVar)
-		if fixCritial {
+		if fixCritical {
 			if numCriticalFix > 0 {
 				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables fixed:", numCriticalFix)
 			} else {
@@ -401,7 +401,7 @@ func scan(hostname string, token string) {
 			}
 		} else {
 			if numCritical > 0 {
-				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables detected:", numCritical, " , you can run tfcvar-scan scan --fixcritical to get them fixed.")
+				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables detected:", numCritical, ",you can run tfcvar-scan scan --fixcritical to get them fixed.")
 			} else {
 				fmt.Println("No " + color.Red + "Critical" + color.Reset + " variables found, well done!")
 			}
@@ -415,7 +415,7 @@ func scan(hostname string, token string) {
 			}
 		} else {
 			if numWarning > 0 {
-				fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables detected:", numWarning, " , you can run tfcvar-scan scan --fixwarning to get them fixed.")
+				fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables detected:", numWarning, ",you can run tfcvar-scan scan --fixwarning to get them fixed.")
 			} else {
 				fmt.Println("No " + color.Yellow + "Warning" + color.Reset + " variables found, well done!")
 			}
