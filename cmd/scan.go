@@ -224,19 +224,15 @@ type varVialation struct {
 	workspaceName string
 	category      string
 	varName       string
-	workspaceId   string
-	varId         string
 }
 
 var varVialations []varVialation
 
-func newVarVialation(orgName string, workspaceName string, category string, varName string, workspaceId string, varId string) *varVialation {
+func newVarVialation(orgName string, workspaceName string, category string, varName string) *varVialation {
 	p := varVialation{workspaceName: workspaceName}
 	p.varName = varName
 	p.category = category
 	p.orgName = orgName
-	p.workspaceId = workspaceId
-	p.varId = varId
 	return &p
 }
 
@@ -333,8 +329,8 @@ func scan(hostname string, token string) {
 						case "env":
 							if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
 								numCritical = numCritical + 1
-								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key, workspaces.ID, wsVar.ID))
-								if fixCritial == true {
+								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+								if fixCritial {
 									numCriticalFix = numCriticalFix + 1
 									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
 										Sensitive: tfe.Bool(true),
@@ -347,7 +343,7 @@ func scan(hostname string, token string) {
 								tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
 								if contains(strings.ToLower(tt), sensitiveTfcVariablePattens) {
 									numWarning = numWarning + 1
-									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key, workspaces.ID, wsVar.ID))
+									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 									if fixWarning {
 										numWarningFix = numWarningFix + 1
 										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
