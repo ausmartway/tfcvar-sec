@@ -358,7 +358,7 @@ func scan(hostname string, token string) {
 						case "terraform":
 							if !wsVar.Sensitive && contains(strings.ToLower(wsVar.Key), sensitiveTfcVariablePattens) {
 								numWarning = numWarning + 1
-								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key, workspaces.ID, wsVar.ID))
+								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 								if fixWarning {
 									numWarningFix = numWarningFix + 1
 									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
