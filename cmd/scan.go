@@ -32,11 +32,15 @@ import (
 const Hostname = "app.terraform.io"
 
 var token string
-var numOrg, numWorkspace, numVar, numCritical, numWarning int
+var fixCritial, fixWarning bool
+var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWarningFix int
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().StringVar(&token, "token", "", "Terraform Cloud/Enterprise personal/team/orgnisation token")
+	scanCmd.Flags().BoolVar(&fixCritial, "fixcritial", false, "fix Critical variables by marking them sensitive,default to false")
+	scanCmd.Flags().BoolVar(&fixCritial, "fixwarning", false, "fix Warning variables by marking them sensitive,default to false")
+
 }
 
 // scanCmd represents the scan command
@@ -220,15 +224,19 @@ type varVialation struct {
 	workspaceName string
 	category      string
 	varName       string
+	workspaceId   string
+	varId         string
 }
 
 var varVialations []varVialation
 
-func newVarVialation(orgName string, workspaceName string, category string, varName string) *varVialation {
+func newVarVialation(orgName string, workspaceName string, category string, varName string, workspaceId string, varId string) *varVialation {
 	p := varVialation{workspaceName: workspaceName}
 	p.varName = varName
 	p.category = category
 	p.orgName = orgName
+	p.workspaceId = workspaceId
+	p.varId = varId
 	return &p
 }
 
@@ -325,18 +333,45 @@ func scan(hostname string, token string) {
 						case "env":
 							if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
 								numCritical = numCritical + 1
-								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key, workspaces.ID, wsVar.ID))
+								if fixCritial == true {
+									numCriticalFix = numCriticalFix + 1
+									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+										Sensitive: tfe.Bool(true),
+									})
+									if err != nil {
+										fmt.Println(updateErr)
+									}
+								}
 							} else if !wsVar.Sensitive && strings.Index(wsVar.Key, "TF_VAR_") == 0 { //if it is TF_VAR_something style
 								tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
 								if contains(strings.ToLower(tt), sensitiveTfcVariablePattens) {
 									numWarning = numWarning + 1
-									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key, workspaces.ID, wsVar.ID))
+									if fixWarning {
+										numWarningFix = numWarningFix + 1
+										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+											Sensitive: tfe.Bool(true),
+										})
+										if err != nil {
+											fmt.Println(updateErr)
+										}
+									}
 								}
 							}
 						case "terraform":
 							if !wsVar.Sensitive && contains(strings.ToLower(wsVar.Key), sensitiveTfcVariablePattens) {
 								numWarning = numWarning + 1
-								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key, workspaces.ID, wsVar.ID))
+								if fixWarning {
+									numWarningFix = numWarningFix + 1
+									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+										Sensitive: tfe.Bool(true),
+									})
+									if err != nil {
+										fmt.Println(updateErr)
+									}
+								}
 							}
 
 						}
@@ -363,6 +398,8 @@ func scan(hostname string, token string) {
 		fmt.Printf("Total number of Workspaces scanned: %d\n", numWorkspace)
 		fmt.Printf("Total number of Variables scanned: %d\n", numVar)
 		fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables detected:", numCritical)
+		fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables fixed:", numCriticalFix)
 		fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables detected:", numWarning)
+		fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables fixed:", numWarningFix)
 	}
 }
