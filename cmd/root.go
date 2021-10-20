@@ -58,5 +58,5 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Prints the tfcvar-sec version")
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	rootCmd.CompletionOptions.DisableDefaultCmd = true // Don't need completeion, tfcvar-sec doesn't have much cmd and flags anyway.
 }
