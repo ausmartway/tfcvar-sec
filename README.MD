@@ -2,7 +2,7 @@
 
 ## TLDR
 
-tfcvar-sec is a tool that scans terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
+tfcvar-sec is a tool that scans and fixes terraform and enviroment variables configured in Terraform Cloud, it finds any variable that may contain secrets but hasn't been marked as sensitive.
 
 ## The problem
 
@@ -71,9 +71,9 @@ Running Terraform cli on the cloud, and use predefined IAM roles. There is no cr
 
 Based on above, providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way(different ways of providing provider credentials can be found at the end of this Readme). It still relies on TFC admins making those that could contain secrets sensitive.
 
-tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
+tfcvar-sec is a tool that scans terraform and enviroment variables configured in Terraform Cloud, find any variable that may contain secrets but hasn't been marked as sensitive, then provide option to fix them.
 
-Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify them. Enviroment variables identified by tfcvar-sec will be printed as Red.
+Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify. Enviroment variables identified by tfcvar-sec will be printed as Red.
 
 Credentials provided to terraform providers via terraform variable is harder to identify, as the variable names can be customised. tfcvar-sec just do a best effort guess based on name of the variable. Identified terraform variables will be printed as Yellow.
 
@@ -104,14 +104,14 @@ Please note that sudo is required so that tfcvar-sec can be installed into /usr/
 
 ### Windows
 
-Download from [releases](https://github.com/ausmartway/tfcvar-sec/releases), unzip and copy to system PATH.
+Download from [releases](https://github.com/ausmartway/tfcvar-sec/releases), unzip and copy the binary to system %PATH%.
 
 ## usage
 
 tfcvar-sec only works with Terraform Cloud for now. You need a Terraform Cloud token which will be used by tfcvar-sec to find all orgnizations,workspaces and variables. eg:
 
 ```bash
-TFE_TOKEN=YOUR.atlasv1.TFE_TOKEN  tfcvar-sec scan
+TFE_TOKEN=YOUROWNTOKEN  tfcvar-sec scan
 ```
 
 or
@@ -126,7 +126,7 @@ tfcvar-sec will read Terraform Cloud credentials file if no tokens are provided 
 tfcvar-sec scan
 ```
 
-If you have docker, you can use below command(replace the token with your own):
+If you have docker, you can use below command:
 
 ```bash
 docker run --rm -ti --env \
