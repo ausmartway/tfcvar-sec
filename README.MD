@@ -141,6 +141,8 @@ docker run --rm -ti ausmartway/tfcvar-sec scan \
 --token YOUROWNTOKEN
 ```
 
+You can also provide cli flag --fixcritical and/or --fixwarning to ask tfcvar-sec scan command to fix the issues for you, those two flags are set to false by default.
+
 ## Colaboration
 
 Please raise issues or pull request if you want to add to the list, providing the URL to related provider documents.
