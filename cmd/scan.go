@@ -38,16 +38,16 @@ var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWa
 func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().StringVar(&token, "token", "", "Terraform Cloud/Enterprise personal/team/orgnisation token")
-	scanCmd.Flags().BoolVar(&fixCritial, "fixcritial", false, "fix Critical variables by marking them sensitive,default to false")
-	scanCmd.Flags().BoolVar(&fixCritial, "fixwarning", false, "fix Warning variables by marking them sensitive,default to false")
+	scanCmd.Flags().BoolVar(&fixCritial, "fixcritial", false, "Fix detected Critical variables by marking them sensitive, default to false")
+	scanCmd.Flags().BoolVar(&fixCritial, "fixwarning", false, "Fix detected Warning variables by marking them sensitive, default to false")
 
 }
 
 // scanCmd represents the scan command
 var scanCmd = &cobra.Command{
 	Use:   "scan",
-	Short: "Scans Terraform Cloud for sensitive varaibles",
-	Long:  `Scans Terraform Cloud for sensitive varaibles`,
+	Short: "Scans/fixes Terraform Cloud for sensitive varaibles",
+	Long:  `Scans/fixes Terraform Cloud for sensitive varaibles`,
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
 		scan(Hostname, token)
