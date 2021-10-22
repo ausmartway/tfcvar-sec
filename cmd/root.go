@@ -30,8 +30,8 @@ var (
 	versionFlag bool
 	rootCmd     = &cobra.Command{
 		Use:   "tfcvar-sec",
-		Short: "tfcvar-sec is a tool that scanns Terraform Cloud for insecure terraform/enviroment variables.",
-		Long:  "tfcvar-sec is a tool that scanns Terraform Cloud for insecure terraform/enviroment variables.\n" + "Insecure enviroment variables are printed in " + color.Red + "Red" + color.Reset + " or " + color.Yellow + "Yellow" + color.Reset + " based on confidence level.",
+		Short: "tfcvar-sec is a tool that scans/fixes Terraform Cloud for insecure terraform/enviroment variables.",
+		Long:  "tfcvar-sec is a tool that scans/fixes Terraform Cloud for insecure terraform/enviroment variables.\n" + "Insecure enviroment variables are printed in " + color.Red + "Red" + color.Reset + " or " + color.Yellow + "Yellow" + color.Reset,
 
 		// Uncomment the following line if your bare application
 		// has an action associated with it:

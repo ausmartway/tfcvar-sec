@@ -401,7 +401,7 @@ func scan(hostname string, token string) {
 			}
 		} else {
 			if numCritical > 0 {
-				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables detected:", numCritical, ",you can run tfcvar-scan scan --fixcritical to get them fixed.")
+				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables detected:", numCritical, ",add --fixcritical flag to fix.")
 			} else {
 				fmt.Println("No " + color.Red + "Critical" + color.Reset + " variables found, well done!")
 			}
@@ -415,7 +415,7 @@ func scan(hostname string, token string) {
 			}
 		} else {
 			if numWarning > 0 {
-				fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables detected:", numWarning, ",you can run tfcvar-scan scan --fixwarning to get them fixed.")
+				fmt.Println("Total number of "+color.Yellow+"Warning"+color.Reset+" variables detected:", numWarning, ",add --fixwarning flag to fix.")
 			} else {
 				fmt.Println("No " + color.Yellow + "Warning" + color.Reset + " variables found, well done!")
 			}
