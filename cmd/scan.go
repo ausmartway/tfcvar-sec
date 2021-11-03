@@ -309,7 +309,12 @@ func scan(hostname string, token string) {
 		numOrg = numOrg + len(orgs.Items)
 		for _, org := range orgs.Items {
 			//for each org, get all workspaces
-			ws, err := client.Workspaces.List(ctx, org.Name, tfe.WorkspaceListOptions{})
+			ws, err := client.Workspaces.List(ctx, org.Name, tfe.WorkspaceListOptions{
+				ListOptions: tfe.ListOptions{
+					PageNumber: 1,
+					PageSize:   2000,
+				},
+			})
 			if err != nil {
 				log.Fatal(err)
 			} else {
