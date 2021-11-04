@@ -39,7 +39,7 @@ var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWa
 func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().StringVar(&token, "token", "", "Terraform Cloud/Enterprise personal/team/orgnisation token")
-	scanCmd.Flags().StringVar(&tfeHostname, "hostname", "app.terraform.io", "Terraform Cloud/Enterprise hostname, defaults to app.terraform.io")
+	scanCmd.Flags().StringVar(&tfeHostname, "hostname", "app.terraform.io", "Terraform Cloud/Enterprise hostname")
 	scanCmd.Flags().BoolVar(&fixCritical, "fixcritical", false, "Fix detected Critical variables by marking them sensitive, default to false")
 	scanCmd.Flags().BoolVar(&fixWarning, "fixwarning", false, "Fix detected Warning variables by marking them sensitive, default to false")
 
