@@ -2,13 +2,14 @@
 
 ## TLDR
 
-tfcvar-sec is a tool that scans and fixes terraform and enviroment variables configured in Terraform Cloud, it finds any variable that may contain secrets but hasn't been marked as sensitive.
+
+tfcvar-sec is a tool that scans terraform and enviroment variables configured in Terraform Cloud/Enterprise, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
 ## The problem
 
 As the most popular Infrastructure as Code tool(or one of), Terraform helps in configuring, provisioning, and managing the infrastructure accross 400+ providers. The first thing Terraform needs is the credential so that it can interact with the provider's API. The credentials used by terraform are generally priviliged so that terraform can create/update/destroy resources. It is very important to keep those credentials secure.
 
-Terraform Cloud is a secure/reliable and governed IaC pipeline that helps teams use Terraform cli all together. It provides a means for practitioner to store their credentials as terraform or enviroment variable, which can be marked as sensitive. Sensitive variables are encrypted and not readable by any practitioner.
+Terraform Cloud/Enterprise is a secure/reliable and governed IaC pipeline that helps teams use Terraform cli all together. It provides a means for practitioner to store their credentials as terraform or enviroment variable, which can be marked as sensitive. Sensitive variables are encrypted and not readable by any practitioner.
 
 ### Different ways of providing credentials to Terraform Providers
 
@@ -36,7 +37,7 @@ provider "aws" {
 }
 ```
 
-This method is an improvement to hardcoding secrets, as the values of terraform variable don't have to be stored in the code. They can be configured in Terraform Cloud. However this method has it's own risk, as the credentials are provided as terraform variable, it's value will be accessble by terraform code, for example:
+This method is an improvement to hardcoding secrets, as the values of terraform variable don't have to be stored in the code. They can be configured in Terraform Cloud/Enterprise. However this method has it's own risk, as the credentials are provided as terraform variable, it's value will be accessble by terraform code, for example:
 
 ```terraform
 output "aws_credentials" {
@@ -69,9 +70,9 @@ Running Terraform cli on the cloud, and use predefined IAM roles. There is no cr
 
 ## The solution
 
-Based on above, providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way(different ways of providing provider credentials can be found at the end of this Readme). It still relies on TFC admins making those that could contain secrets sensitive.
+Based on above, providing provider credentials via Enviroment variables perhaps is the most widely used and most secure way(different ways of providing provider credentials can be found at the end of this Readme). It still relies on Terraform Cloud/Enterprise admins making those that could contain secrets sensitive.
 
-tfcvar-sec is a tool that scans terraform and enviroment variables configured in Terraform Cloud, find any variable that may contain secrets but hasn't been marked as sensitive, then provide option to fix them.
+tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud/Enterprise, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
 Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify. Enviroment variables identified by tfcvar-sec will be printed as Red.
 
@@ -108,22 +109,22 @@ Download from [releases](https://github.com/ausmartway/tfcvar-sec/releases), unz
 
 ## usage
 
-tfcvar-sec only works with Terraform Cloud for now. You need a Terraform Cloud token which will be used by tfcvar-sec to find all orgnizations,workspaces and variables. eg:
+tfcvar-sec works with Terraform Cloud and Terraform Enterprise. You need a Terraform Cloud/Enterprise token which will be used by tfcvar-sec to find all orgnizations,workspaces and variables. eg:
 
 ```bash
-TFE_TOKEN=YOUROWNTOKEN  tfcvar-sec scan
+tfcvar-sec scan
 ```
 
 or
 
 ```bash
-tfcvar-sec scan --token YOUROWNTOKEN
+tfcvar-sec scan --token YOUROWNTOKEN --hostname YOUROWNTFEHOSTNAME
 ```
 
-tfcvar-sec will read Terraform Cloud credentials file if no tokens are provided via cli or enviroment variable. This is $HOME/.terraform.d/credentials.tfrc.json by default. eg:
+tfcvar-sec will read Terraform Cloud/Enterprise credentials file if no tokens are provided via cli or enviroment variable. This is $HOME/.terraform.d/credentials.tfrc.json by default. eg:
 
 ```bash
-tfcvar-sec scan
+tfcvar-sec scan -hostname your.tfe.hostname
 ```
 
 If you have docker, you can use below command:
@@ -131,6 +132,7 @@ If you have docker, you can use below command:
 ```bash
 docker run --rm -ti --env \
 TFE_TOKEN=YOUROWNTOKEN \
+TFE_HOSTNAME=YOUROWNTFEHOSTNAME
 ausmartway/tfcvar-sec scan
 ```
 
@@ -138,7 +140,7 @@ or
 
 ```bash
 docker run --rm -ti ausmartway/tfcvar-sec scan \
---token YOUROWNTOKEN
+--token YOUROWNTOKEN --hostname YOUROWNTFEHOSTNAME
 ```
 
 You can also provide cli flag --fixcritical and/or --fixwarning to ask tfcvar-sec scan command to fix the issues for you, those two flags are set to false by default.
