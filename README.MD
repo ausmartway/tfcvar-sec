@@ -2,6 +2,7 @@
 
 ## TLDR
 
+
 tfcvar-sec is a tool that scans terraform and enviroment variables configured in Terraform Cloud/Enterprise, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
 ## The problem
@@ -73,7 +74,7 @@ Based on above, providing provider credentials via Enviroment variables perhaps 
 
 tfcvar-sec is a tool that will scan terraform and enviroment variables configured in Terraform Cloud/Enterprise, and let you know if there is any variable that may contain secrets but hasn't been marked as sensitive.
 
-Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify them. Enviroment variables identified by tfcvar-sec will be printed as Red.
+Credentials provided to terraform providers via enviroment variables have fixed key, this makes it easy for tfcvar-sec to identify. Enviroment variables identified by tfcvar-sec will be printed as Red.
 
 Credentials provided to terraform providers via terraform variable is harder to identify, as the variable names can be customised. tfcvar-sec just do a best effort guess based on name of the variable. Identified terraform variables will be printed as Yellow.
 
@@ -104,7 +105,7 @@ Please note that sudo is required so that tfcvar-sec can be installed into /usr/
 
 ### Windows
 
-Download from [releases](https://github.com/ausmartway/tfcvar-sec/releases), unzip and copy to system PATH.
+Download from [releases](https://github.com/ausmartway/tfcvar-sec/releases), unzip and copy the binary to system %PATH%.
 
 ## usage
 
@@ -126,7 +127,7 @@ tfcvar-sec will read Terraform Cloud/Enterprise credentials file if no tokens ar
 tfcvar-sec scan -hostname your.tfe.hostname
 ```
 
-If you have docker, you can use below command(replace the token with your own):
+If you have docker, you can use below command:
 
 ```bash
 docker run --rm -ti --env \
@@ -141,6 +142,8 @@ or
 docker run --rm -ti ausmartway/tfcvar-sec scan \
 --token YOUROWNTOKEN --hostname YOUROWNTFEHOSTNAME
 ```
+
+You can also provide cli flag --fixcritical and/or --fixwarning to ask tfcvar-sec scan command to fix the issues for you, those two flags are set to false by default.
 
 ## Colaboration
 
