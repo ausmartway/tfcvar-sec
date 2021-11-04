@@ -353,7 +353,7 @@ func scan(hostname string, token string) {
 										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
 											Sensitive: tfe.Bool(true),
 										})
-										if err != nil {
+										if updateErr != nil {
 											fmt.Println(updateErr)
 										}
 									}
@@ -367,7 +367,7 @@ func scan(hostname string, token string) {
 											_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
 												Sensitive: tfe.Bool(true),
 											})
-											if err != nil {
+											if updateErr != nil {
 												fmt.Println(updateErr)
 											}
 										}
@@ -382,7 +382,7 @@ func scan(hostname string, token string) {
 										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
 											Sensitive: tfe.Bool(true),
 										})
-										if err != nil {
+										if updateErr != nil {
 											fmt.Println(updateErr)
 										}
 									}
