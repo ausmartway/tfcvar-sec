@@ -31,6 +31,7 @@ import (
 
 const Hostname = "app.terraform.io"
 
+var tfeHostname string
 var token string
 var fixCritical, fixWarning bool
 var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWarningFix int
@@ -38,6 +39,7 @@ var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWa
 func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().StringVar(&token, "token", "", "Terraform Cloud/Enterprise personal/team/orgnisation token")
+	scanCmd.Flags().StringVar(&tfeHostname, "hostname", "app.terraform.io", "Terraform Cloud/Enterprise hostname, defaults to app.terraform.io")
 	scanCmd.Flags().BoolVar(&fixCritical, "fixcritical", false, "Fix detected Critical variables by marking them sensitive, default to false")
 	scanCmd.Flags().BoolVar(&fixWarning, "fixwarning", false, "Fix detected Warning variables by marking them sensitive, default to false")
 
@@ -50,7 +52,7 @@ var scanCmd = &cobra.Command{
 	Long:  `Scans/fixes Terraform Cloud for sensitive varaibles`,
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig()
-		scan(Hostname, token)
+		scan(tfeHostname, token)
 	},
 }
 
@@ -273,7 +275,7 @@ func initConfig() {
 			// If a config file is found, read it in.
 			if err := viper.ReadInConfig(); err == nil {
 				fmt.Fprintln(os.Stderr, "Using credential file:", viper.ConfigFileUsed())
-				token = viper.GetString("credentials." + Hostname + ".token")
+				token = viper.GetString("credentials." + tfeHostname + ".token")
 			} else {
 				fmt.Fprintln(os.Stderr, "error:", "No token provided on cli")
 				fmt.Fprintln(os.Stderr, "error:", err)
@@ -302,51 +304,77 @@ func scan(hostname string, token string) {
 	ctx := context.Background()
 
 	//get all orgs
-	orgs, err := client.Organizations.List(ctx, tfe.OrganizationListOptions{})
+	orgs, err := client.Organizations.List(ctx, tfe.OrganizationListOptions{
+		ListOptions: tfe.ListOptions{
+			PageNumber: 1,
+			PageSize:   100,
+		},
+	})
+
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		numOrg = numOrg + len(orgs.Items)
 		for _, org := range orgs.Items {
-			//for each org, get all workspaces
-			ws, err := client.Workspaces.List(ctx, org.Name, tfe.WorkspaceListOptions{
-				ListOptions: tfe.ListOptions{
-					PageNumber: 1,
-					PageSize:   2000,
-				},
-			})
-			if err != nil {
-				log.Fatal(err)
-			} else {
-				numWorkspace = numWorkspace + len(ws.Items)
-				for _, workspaces := range ws.Items {
-					//for each workspace, get all variables
-					variables, _ := client.Variables.List(ctx, workspaces.ID, tfe.VariableListOptions{
-						ListOptions: tfe.ListOptions{
-							PageNumber: 1,
-							PageSize:   1000,
-						},
-					})
-					//for each variable, see if it is in the list but not marked sensitive
-					numVar = numVar + len(variables.Items)
-					for _, wsVar := range variables.Items {
-						switch wsVar.Category {
-						case "env":
-							if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
-								numCritical = numCritical + 1
-								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
-								if fixCritical {
-									numCriticalFix = numCriticalFix + 1
-									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
-										Sensitive: tfe.Bool(true),
-									})
-									if err != nil {
-										fmt.Println(updateErr)
+			//for each org, get first page of workspaces
+			currentPage := 1
+			totalPage := 1
+			for currentPage <= totalPage {
+				ws, err := client.Workspaces.List(ctx, org.Name, tfe.WorkspaceListOptions{
+					ListOptions: tfe.ListOptions{
+						PageNumber: currentPage,
+						PageSize:   20,
+					},
+				})
+
+				if err != nil {
+					log.Fatal(err)
+				} else {
+					fmt.Print(".")
+					numWorkspace = numWorkspace + len(ws.Items)
+					for _, workspaces := range ws.Items {
+						//for each workspace, get all variables
+						variables, _ := client.Variables.List(ctx, workspaces.ID, tfe.VariableListOptions{
+							ListOptions: tfe.ListOptions{
+								PageNumber: 1,
+								PageSize:   1000,
+							},
+						})
+						//for each variable, see if it is in the list but not marked sensitive
+						numVar = numVar + len(variables.Items)
+						for _, wsVar := range variables.Items {
+							switch wsVar.Category {
+							case "env":
+								if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
+									numCritical = numCritical + 1
+									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+									if fixCritical {
+										numCriticalFix = numCriticalFix + 1
+										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+											Sensitive: tfe.Bool(true),
+										})
+										if err != nil {
+											fmt.Println(updateErr)
+										}
+									}
+								} else if !wsVar.Sensitive && strings.Index(wsVar.Key, "TF_VAR_") == 0 { //if it is TF_VAR_something style
+									tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
+									if contains(strings.ToLower(tt), sensitiveTfcVariablePattens) {
+										numWarning = numWarning + 1
+										varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+										if fixWarning {
+											numWarningFix = numWarningFix + 1
+											_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
+												Sensitive: tfe.Bool(true),
+											})
+											if err != nil {
+												fmt.Println(updateErr)
+											}
+										}
 									}
 								}
-							} else if !wsVar.Sensitive && strings.Index(wsVar.Key, "TF_VAR_") == 0 { //if it is TF_VAR_something style
-								tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
-								if contains(strings.ToLower(tt), sensitiveTfcVariablePattens) {
+							case "terraform":
+								if !wsVar.Sensitive && contains(strings.ToLower(wsVar.Key), sensitiveTfcVariablePattens) {
 									numWarning = numWarning + 1
 									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 									if fixWarning {
@@ -360,28 +388,14 @@ func scan(hostname string, token string) {
 									}
 								}
 							}
-						case "terraform":
-							if !wsVar.Sensitive && contains(strings.ToLower(wsVar.Key), sensitiveTfcVariablePattens) {
-								numWarning = numWarning + 1
-								varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
-								if fixWarning {
-									numWarningFix = numWarningFix + 1
-									_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
-										Sensitive: tfe.Bool(true),
-									})
-									if err != nil {
-										fmt.Println(updateErr)
-									}
-								}
-							}
-
 						}
 					}
 				}
-
+				totalPage = ws.TotalPages
+				currentPage = currentPage + 1
 			}
 		}
-
+		fmt.Println()
 		for i := 0; i < len(varVialations); i++ {
 			var cc string
 			if varVialations[i].category == "terraform" {
@@ -398,6 +412,7 @@ func scan(hostname string, token string) {
 		fmt.Printf("Total number of Orgnisations scanned: %d\n", numOrg)
 		fmt.Printf("Total number of Workspaces scanned: %d\n", numWorkspace)
 		fmt.Printf("Total number of Variables scanned: %d\n", numVar)
+
 		if fixCritical {
 			if numCriticalFix > 0 {
 				fmt.Println("Total number of "+color.Red+"Critical"+color.Reset+" variables fixed:", numCriticalFix)
