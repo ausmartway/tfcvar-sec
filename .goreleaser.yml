@@ -1,12 +1,10 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
 version: 2
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
     - go generate ./...
+
 builds:
   - env:
       - CGO_ENABLED=0
@@ -28,103 +26,75 @@ builds:
         goarch: arm
     ldflags:
       - -X version.Version={{.Tag}} -X version.PackageManager=goreleaser
+
 universal_binaries:
-- replace: false
+  - replace: false
 
 dockers:
-- image_templates:
-  - "ausmartwayhashi/tfcvar-sec:latest"
-  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-amd64"
-  use: buildx
-  dockerfile: Dockerfile
-  build_flag_templates:
-  - "--platform=linux/amd64"
+  - image_templates:
+      - "ausmartwayhashi/tfcvar-sec:latest"
+      - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-amd64"
+    use: buildx
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
 
-- image_templates:
-  - "ausmartwayhashi/tfcvar-sec:latest"
-  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-arm64"
-  use: buildx
-  goarch: arm64
-  dockerfile: Dockerfile
-  build_flag_templates:
-  - "--platform=linux/arm64/v8"
+  - image_templates:
+      - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-arm64"
+    use: buildx
+    goarch: arm64
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
 
-- image_templates:
-  - "ausmartwayhashi/tfcvar-sec:latest"
-  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv7"
-  use: buildx
-  dockerfile: Dockerfile
-  build_flag_templates:
-  - "--platform=linux/arm/v7"
+  - image_templates:
+      - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv7"
+    use: buildx
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
 
-- image_templates:
-  - "ausmartwayhashi/tfcvar-sec:latest"
-  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv6"
-  use: buildx
-  dockerfile: Dockerfile
-  build_flag_templates:
-  - "--platform=linux/arm/v6"
+  - image_templates:
+      - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv6"
+    use: buildx
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm/v6"
 
 docker_manifests:
-- name_template: ausmartwayhashi/tfcvar-sec:latest
-  image_templates:
-  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-amd64
-  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-arm64
-  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv7
-  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv6
+  - name_template: ausmartwayhashi/tfcvar-sec:latest
+    image_templates:
+      - ausmartwayhashi/tfcvar-sec:{{ .Version }}-amd64
+      - ausmartwayhashi/tfcvar-sec:{{ .Version }}-arm64
+      - ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv7
+      - ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv6
 
 archives:
   - formats:
       - tar.gz
+
 checksum:
   name_template: 'checksums.txt'
+
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
+
 changelog:
   sort: asc
   filters:
     exclude:
       - '^docs:'
       - '^test:'
-brews:
-  -
-    # Name of the recipe
-    # Default to project name
-    name: tfcvar-sec
 
-  # GitHub/GitLab repository to push the formula to
+homebrew_casks:
+  - name: tfcvar-sec
     repository:
       owner: ausmartway
       name: homebrew-tfcvar-sec
-    # Git author used to commit to the repository.
-    # Defaults are shown.
     commit_author:
       name: Yulei Liu
       email: yulei.liu@gmail.com
-
-    # Caveats for the user of your binary.
-    # Default is empty.
     caveats: "Type 'tfcvar-sec scan' on your command line."
-
-    # Your app's homepage.
-    # Default is empty.
-    homepage: "https://github.com/ausmartwayhashi/tfcvar-sec"
-
-    # Your app's description.
-    # Default is empty.
-    description: "The tfcvar-sec is a tool that scanns Terraform Cloud for insecure terraform/enviroment variables."
-
-    # Setting this will prevent goreleaser to actually try to commit the updated
-    # formula - instead, the formula file will be stored on the dist folder only,
-    # leaving the responsibility of publishing it to the user.
-    # Default is false.
+    homepage: "https://github.com/ausmartway/tfcvar-sec"
+    description: "The tfcvar-sec is a tool that scans Terraform Cloud for insecure terraform/environment variables."
     skip_upload: false
-
-    # So you can `brew test` your formula.
-    # Default is empty.
-    test: |
-      system "#{bin}/tfcvar-sec --version"
-    # Custom install script for brew.
-    # Default is 'bin.install "program"'.
-    install: |
-      bin.install "tfcvar-sec"
