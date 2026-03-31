@@ -33,16 +33,16 @@ universal_binaries:
 
 dockers:
 - image_templates:
-  - "ausmartway/tfcvar-sec:latest"
-  - "ausmartway/tfcvar-sec:{{ .Version }}-amd64"
+  - "ausmartwayhashi/tfcvar-sec:latest"
+  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-amd64"
   use: buildx
   dockerfile: Dockerfile
   build_flag_templates:
   - "--platform=linux/amd64"
 
 - image_templates:
-  - "ausmartway/tfcvar-sec:latest"
-  - "ausmartway/tfcvar-sec:{{ .Version }}-arm64"
+  - "ausmartwayhashi/tfcvar-sec:latest"
+  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-arm64"
   use: buildx
   goarch: arm64
   dockerfile: Dockerfile
@@ -50,28 +50,28 @@ dockers:
   - "--platform=linux/arm64/v8"
 
 - image_templates:
-  - "ausmartway/tfcvar-sec:latest"
-  - "ausmartway/tfcvar-sec:{{ .Version }}-armv7"
+  - "ausmartwayhashi/tfcvar-sec:latest"
+  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv7"
   use: buildx
   dockerfile: Dockerfile
   build_flag_templates:
   - "--platform=linux/arm/v7"
 
 - image_templates:
-  - "ausmartway/tfcvar-sec:latest"
-  - "ausmartway/tfcvar-sec:{{ .Version }}-armv6"
+  - "ausmartwayhashi/tfcvar-sec:latest"
+  - "ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv6"
   use: buildx
   dockerfile: Dockerfile
   build_flag_templates:
   - "--platform=linux/arm/v6"
 
 docker_manifests:
-- name_template: ausmartway/tfcvar-sec:latest
+- name_template: ausmartwayhashi/tfcvar-sec:latest
   image_templates:
-  - ausmartway/tfcvar-sec:{{ .Version }}-amd64
-  - ausmartway/tfcvar-sec:{{ .Version }}-arm64
-  - ausmartway/tfcvar-sec:{{ .Version }}-armv7
-  - ausmartway/tfcvar-sec:{{ .Version }}-armv6
+  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-amd64
+  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-arm64
+  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv7
+  - ausmartwayhashi/tfcvar-sec:{{ .Version }}-armv6
 
 archives:
   - formats:
@@ -108,7 +108,7 @@ brews:
 
     # Your app's homepage.
     # Default is empty.
-    homepage: "https://github.com/ausmartway/tfcvar-sec"
+    homepage: "https://github.com/ausmartwayhashi/tfcvar-sec"
 
     # Your app's description.
     # Default is empty.
