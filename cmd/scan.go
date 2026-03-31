@@ -248,7 +248,6 @@ func printViolation(v varVialation) {
 	} else {
 		cc = color.Red
 	}
-	fmt.Print("\n")
 	if v.variableSetName != "" {
 		fmt.Println("Orgnization:", v.orgName, ",variable set:", v.variableSetName, ",category:", v.category, ",Variable:", cc+v.varName+color.Reset)
 	} else {
