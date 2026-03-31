@@ -360,7 +360,6 @@ func scan(hostname string, token string) {
 				if err != nil {
 					break
 				} else {
-					fmt.Print(".")
 					numWorkspace = numWorkspace + len(ws.Items)
 					for _, workspaces := range ws.Items {
 						//for each workspace, get all variables
@@ -502,7 +501,6 @@ func scan(hostname string, token string) {
 				vsPage = vsPage + 1
 			}
 		}
-		fmt.Println()
 		fmt.Println()
 		fmt.Printf("Total number of Orgnisations scanned: %d\n", numOrg)
 		fmt.Printf("Total number of Workspaces scanned: %d\n", numWorkspace)
