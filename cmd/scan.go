@@ -35,6 +35,7 @@ var tfeHostname string
 var token string
 var fixCritical, fixWarning bool
 var numOrg, numWorkspace, numVar, numCritical, numWarning, numCriticalFix, numWarningFix int
+var numVarSet, numVarSetVar int
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
@@ -373,7 +374,7 @@ func scan(hostname string, token string) {
 						for _, wsVar := range variables.Items {
 							switch wsVar.Category {
 							case "env":
-								if sensitiveEnvVariables[wsVar.Key] && !wsVar.Sensitive { //Enviroment variables is exact match
+								if isEnvVarCritical(wsVar.Key) && !wsVar.Sensitive { //Enviroment variables is exact match
 									numCritical = numCritical + 1
 									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 									if fixCritical {
@@ -387,7 +388,7 @@ func scan(hostname string, token string) {
 									}
 								} else if !wsVar.Sensitive && strings.Index(wsVar.Key, "TF_VAR_") == 0 { //if it is TF_VAR_something style
 									tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
-									if contains(strings.ToLower(tt), sensitiveTfcVariablePattens) {
+									if isTfVarWarning(tt) {
 										numWarning = numWarning + 1
 										varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 										if fixWarning {
@@ -402,7 +403,7 @@ func scan(hostname string, token string) {
 									}
 								}
 							case "terraform":
-								if !wsVar.Sensitive && contains(strings.ToLower(wsVar.Key), sensitiveTfcVariablePattens) {
+								if !wsVar.Sensitive && isTfVarWarning(wsVar.Key) {
 									numWarning = numWarning + 1
 									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 									if fixWarning {
@@ -421,6 +422,83 @@ func scan(hostname string, token string) {
 				}
 				totalPage = ws.TotalPages
 				currentPage = currentPage + 1
+			}
+
+			// Scan variable sets for this org
+			vsPage := 1
+			vsTotalPage := 1
+			for vsPage <= vsTotalPage {
+				vsl, err := client.VariableSets.List(ctx, org.Name, &tfe.VariableSetListOptions{
+					ListOptions: tfe.ListOptions{
+						PageNumber: vsPage,
+						PageSize:   50,
+					},
+				})
+				if err != nil {
+					log.Fatal(err)
+				}
+				numVarSet = numVarSet + len(vsl.Items)
+				for _, vs := range vsl.Items {
+					vsVars, err := client.VariableSetVariables.List(ctx, vs.ID, &tfe.VariableSetVariableListOptions{
+						ListOptions: tfe.ListOptions{
+							PageNumber: 1,
+							PageSize:   1000,
+						},
+					})
+					if err != nil {
+						log.Fatal(err)
+					}
+					numVarSetVar = numVarSetVar + len(vsVars.Items)
+					for _, vsVar := range vsVars.Items {
+						switch string(vsVar.Category) {
+						case "env":
+							if isEnvVarCritical(vsVar.Key) && !vsVar.Sensitive {
+								numCritical = numCritical + 1
+								varVialations = append(varVialations, *newVarSetVialation(org.Name, vs.Name, vs.ID, vsVar.ID, string(vsVar.Category), vsVar.Key))
+								if fixCritical {
+									numCriticalFix = numCriticalFix + 1
+									_, updateErr := client.VariableSetVariables.Update(ctx, vs.ID, vsVar.ID, &tfe.VariableSetVariableUpdateOptions{
+										Sensitive: tfe.Bool(true),
+									})
+									if updateErr != nil {
+										fmt.Println(updateErr)
+									}
+								}
+							} else if !vsVar.Sensitive && strings.Index(vsVar.Key, "TF_VAR_") == 0 {
+								tt := strings.Replace(vsVar.Key, "TF_VAR_", "", 1)
+								if isTfVarWarning(tt) {
+									numWarning = numWarning + 1
+									varVialations = append(varVialations, *newVarSetVialation(org.Name, vs.Name, vs.ID, vsVar.ID, string(vsVar.Category), vsVar.Key))
+									if fixWarning {
+										numWarningFix = numWarningFix + 1
+										_, updateErr := client.VariableSetVariables.Update(ctx, vs.ID, vsVar.ID, &tfe.VariableSetVariableUpdateOptions{
+											Sensitive: tfe.Bool(true),
+										})
+										if updateErr != nil {
+											fmt.Println(updateErr)
+										}
+									}
+								}
+							}
+						case "terraform":
+							if !vsVar.Sensitive && isTfVarWarning(vsVar.Key) {
+								numWarning = numWarning + 1
+								varVialations = append(varVialations, *newVarSetVialation(org.Name, vs.Name, vs.ID, vsVar.ID, string(vsVar.Category), vsVar.Key))
+								if fixWarning {
+									numWarningFix = numWarningFix + 1
+									_, updateErr := client.VariableSetVariables.Update(ctx, vs.ID, vsVar.ID, &tfe.VariableSetVariableUpdateOptions{
+										Sensitive: tfe.Bool(true),
+									})
+									if updateErr != nil {
+										fmt.Println(updateErr)
+									}
+								}
+							}
+						}
+					}
+				}
+				vsTotalPage = vsl.TotalPages
+				vsPage = vsPage + 1
 			}
 		}
 		fmt.Println()
