@@ -1,5 +1,6 @@
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
+version: 2
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -73,11 +74,8 @@ docker_manifests:
   - ausmartway/tfcvar-sec:{{ .Version }}-armv6
 
 archives:
-  - replacements:
-      darwin: darwin
-      linux: linux
-      windows: windows
-      386: i386
+  - formats:
+      - tar.gz
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -95,7 +93,7 @@ brews:
     name: tfcvar-sec
 
   # GitHub/GitLab repository to push the formula to
-    tap:
+    repository:
       owner: ausmartway
       name: homebrew-tfcvar-sec
     # Git author used to commit to the repository.
@@ -103,10 +101,6 @@ brews:
     commit_author:
       name: Yulei Liu
       email: yulei.liu@gmail.com
-
-    # Folder inside the repository to put the formula.
-    # Default is the root folder.
-    folder: Formula
 
     # Caveats for the user of your binary.
     # Default is empty.
