@@ -220,12 +220,17 @@ var sensitiveEnvVariables = map[string]bool{
 	"LINODE_TOKEN": true,
 }
 
-//flat structure
+// varVialation holds details of a single detected insecure variable.
+// For workspace variables, workspaceName is set and variableSetName is empty.
+// For variable set variables, variableSetName and variableSetID are set.
 type varVialation struct {
-	orgName       string
-	workspaceName string
-	category      string
-	varName       string
+	orgName         string
+	workspaceName   string
+	variableSetName string // set for variable set findings; empty for workspace findings
+	variableSetID   string // used for fix calls only
+	varID           string // used for fix calls only
+	category        string
+	varName         string
 }
 
 var varVialations []varVialation
@@ -236,6 +241,17 @@ func newVarVialation(orgName string, workspaceName string, category string, varN
 	p.category = category
 	p.orgName = orgName
 	return &p
+}
+
+func newVarSetVialation(orgName, variableSetName, variableSetID, varID, category, varName string) *varVialation {
+	return &varVialation{
+		orgName:         orgName,
+		variableSetName: variableSetName,
+		variableSetID:   variableSetID,
+		varID:           varID,
+		category:        category,
+		varName:         varName,
+	}
 }
 
 func contains(str string, substrlist []string) bool {
