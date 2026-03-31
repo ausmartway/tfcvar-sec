@@ -223,35 +223,36 @@ var sensitiveEnvVariables = map[string]bool{
 
 // varVialation holds details of a single detected insecure variable.
 // For workspace variables, workspaceName is set and variableSetName is empty.
-// For variable set variables, variableSetName and variableSetID are set.
+// For variable set variables, variableSetName is set and workspaceName is empty.
 type varVialation struct {
 	orgName         string
 	workspaceName   string
-	variableSetName string // set for variable set findings; empty for workspace findings
-	variableSetID   string // used for fix calls only
-	varID           string // used for fix calls only
+	variableSetName string
 	category        string
 	varName         string
 }
 
-var varVialations []varVialation
-
 func newVarVialation(orgName string, workspaceName string, category string, varName string) *varVialation {
-	p := varVialation{workspaceName: workspaceName}
-	p.varName = varName
-	p.category = category
-	p.orgName = orgName
-	return &p
+	return &varVialation{orgName: orgName, workspaceName: workspaceName, category: category, varName: varName}
 }
 
-func newVarSetVialation(orgName, variableSetName, variableSetID, varID, category, varName string) *varVialation {
-	return &varVialation{
-		orgName:         orgName,
-		variableSetName: variableSetName,
-		variableSetID:   variableSetID,
-		varID:           varID,
-		category:        category,
-		varName:         varName,
+func newVarSetVialation(orgName, variableSetName, category, varName string) *varVialation {
+	return &varVialation{orgName: orgName, variableSetName: variableSetName, category: category, varName: varName}
+}
+
+// printViolation prints a single detected insecure variable immediately to stdout.
+func printViolation(v varVialation) {
+	var cc string
+	if v.category == "terraform" || strings.HasPrefix(v.varName, "TF_VAR_") {
+		cc = color.Yellow
+	} else {
+		cc = color.Red
+	}
+	fmt.Print("\n")
+	if v.variableSetName != "" {
+		fmt.Println("Orgnization:", v.orgName, ",variable set:", v.variableSetName, ",category:", v.category, ",Variable:", cc+v.varName+color.Reset)
+	} else {
+		fmt.Println("Orgnization:", v.orgName, ",workspace:", v.workspaceName, ",category:", v.category, ",Variable:", cc+v.varName+color.Reset)
 	}
 }
 
@@ -376,7 +377,7 @@ func scan(hostname string, token string) {
 							case "env":
 								if isEnvVarCritical(wsVar.Key) && !wsVar.Sensitive { //Enviroment variables is exact match
 									numCritical = numCritical + 1
-									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+									printViolation(*newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 									if fixCritical {
 										numCriticalFix = numCriticalFix + 1
 										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
@@ -390,7 +391,7 @@ func scan(hostname string, token string) {
 									tt := strings.Replace(wsVar.Key, "TF_VAR_", "", 1)
 									if isTfVarWarning(tt) {
 										numWarning = numWarning + 1
-										varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+										printViolation(*newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 										if fixWarning {
 											numWarningFix = numWarningFix + 1
 											_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
@@ -405,7 +406,7 @@ func scan(hostname string, token string) {
 							case "terraform":
 								if !wsVar.Sensitive && isTfVarWarning(wsVar.Key) {
 									numWarning = numWarning + 1
-									varVialations = append(varVialations, *newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
+									printViolation(*newVarVialation(org.Name, workspaces.Name, string(wsVar.Category), wsVar.Key))
 									if fixWarning {
 										numWarningFix = numWarningFix + 1
 										_, updateErr := client.Variables.Update(ctx, workspaces.ID, wsVar.ID, tfe.VariableUpdateOptions{
@@ -454,7 +455,7 @@ func scan(hostname string, token string) {
 						case "env":
 							if isEnvVarCritical(vsVar.Key) && !vsVar.Sensitive {
 								numCritical = numCritical + 1
-								varVialations = append(varVialations, *newVarSetVialation(org.Name, vs.Name, vs.ID, vsVar.ID, string(vsVar.Category), vsVar.Key))
+								printViolation(*newVarSetVialation(org.Name, vs.Name, string(vsVar.Category), vsVar.Key))
 								if fixCritical {
 									numCriticalFix = numCriticalFix + 1
 									_, updateErr := client.VariableSetVariables.Update(ctx, vs.ID, vsVar.ID, &tfe.VariableSetVariableUpdateOptions{
@@ -468,7 +469,7 @@ func scan(hostname string, token string) {
 								tt := strings.Replace(vsVar.Key, "TF_VAR_", "", 1)
 								if isTfVarWarning(tt) {
 									numWarning = numWarning + 1
-									varVialations = append(varVialations, *newVarSetVialation(org.Name, vs.Name, vs.ID, vsVar.ID, string(vsVar.Category), vsVar.Key))
+									printViolation(*newVarSetVialation(org.Name, vs.Name, string(vsVar.Category), vsVar.Key))
 									if fixWarning {
 										numWarningFix = numWarningFix + 1
 										_, updateErr := client.VariableSetVariables.Update(ctx, vs.ID, vsVar.ID, &tfe.VariableSetVariableUpdateOptions{
@@ -483,7 +484,7 @@ func scan(hostname string, token string) {
 						case "terraform":
 							if !vsVar.Sensitive && isTfVarWarning(vsVar.Key) {
 								numWarning = numWarning + 1
-								varVialations = append(varVialations, *newVarSetVialation(org.Name, vs.Name, vs.ID, vsVar.ID, string(vsVar.Category), vsVar.Key))
+								printViolation(*newVarSetVialation(org.Name, vs.Name, string(vsVar.Category), vsVar.Key))
 								if fixWarning {
 									numWarningFix = numWarningFix + 1
 									_, updateErr := client.VariableSetVariables.Update(ctx, vs.ID, vsVar.ID, &tfe.VariableSetVariableUpdateOptions{
@@ -502,22 +503,6 @@ func scan(hostname string, token string) {
 			}
 		}
 		fmt.Println()
-		for i := 0; i < len(varVialations); i++ {
-			var cc string
-			if varVialations[i].category == "terraform" {
-				cc = color.Yellow
-			} else if strings.HasPrefix(varVialations[i].varName, "TF_VAR_") {
-				cc = color.Yellow
-			} else {
-				cc = color.Red
-			}
-			if varVialations[i].variableSetName != "" {
-				fmt.Println("Orgnization:", varVialations[i].orgName, ",variable set:", varVialations[i].variableSetName, ",category:", varVialations[i].category, ",Variable:", cc+varVialations[i].varName+color.Reset)
-			} else {
-				fmt.Println("Orgnization:", varVialations[i].orgName, ",workspace:", varVialations[i].workspaceName, ",category:", varVialations[i].category, ",Variable:", cc+varVialations[i].varName+color.Reset)
-			}
-		}
-
 		fmt.Println()
 		fmt.Printf("Total number of Orgnisations scanned: %d\n", numOrg)
 		fmt.Printf("Total number of Workspaces scanned: %d\n", numWorkspace)
