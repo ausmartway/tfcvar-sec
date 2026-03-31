@@ -4,4 +4,7 @@ tfcvar-sec
 vendor/version
 vendor/*
 Formula/*
+.claude/
+.ralph-logs/
+progress.md
 
