@@ -247,6 +247,18 @@ func contains(str string, substrlist []string) bool {
 	return false
 }
 
+// isEnvVarCritical returns true if the env var key is a known provider secret
+// that should always be marked sensitive.
+func isEnvVarCritical(key string) bool {
+	return sensitiveEnvVariables[key]
+}
+
+// isTfVarWarning returns true if the terraform variable name contains a pattern
+// that suggests it may hold a secret.
+func isTfVarWarning(key string) bool {
+	return contains(strings.ToLower(key), sensitiveTfcVariablePattens)
+}
+
 // initConfig reads in credential file and ENV variables if set.
 func initConfig() {
 	var home string
@@ -304,7 +316,7 @@ func scan(hostname string, token string) {
 	ctx := context.Background()
 
 	//get all orgs
-	orgs, err := client.Organizations.List(ctx, tfe.OrganizationListOptions{
+	orgs, err := client.Organizations.List(ctx, &tfe.OrganizationListOptions{
 		ListOptions: tfe.ListOptions{
 			PageNumber: 1,
 			PageSize:   100,
@@ -320,7 +332,7 @@ func scan(hostname string, token string) {
 			currentPage := 1
 			totalPage := 1
 			for currentPage <= totalPage {
-				ws, err := client.Workspaces.List(ctx, org.Name, tfe.WorkspaceListOptions{
+				ws, err := client.Workspaces.List(ctx, org.Name, &tfe.WorkspaceListOptions{
 					ListOptions: tfe.ListOptions{
 						PageNumber: currentPage,
 						PageSize:   20,
@@ -334,7 +346,7 @@ func scan(hostname string, token string) {
 					numWorkspace = numWorkspace + len(ws.Items)
 					for _, workspaces := range ws.Items {
 						//for each workspace, get all variables
-						variables, _ := client.Variables.List(ctx, workspaces.ID, tfe.VariableListOptions{
+						variables, _ := client.Variables.List(ctx, workspaces.ID, &tfe.VariableListOptions{
 							ListOptions: tfe.ListOptions{
 								PageNumber: 1,
 								PageSize:   1000,
