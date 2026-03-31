@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"version"
+	"tfcvar-sec/version"
 
 	"github.com/TwiN/go-color"
 	"github.com/spf13/cobra"
