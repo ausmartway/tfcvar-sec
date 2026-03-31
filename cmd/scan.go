@@ -511,13 +511,19 @@ func scan(hostname string, token string) {
 			} else {
 				cc = color.Red
 			}
-			fmt.Println("Orgnization:", varVialations[i].orgName, ",workspace:", varVialations[i].workspaceName, ",category:", varVialations[i].category, ",Variable:", cc+varVialations[i].varName+color.Reset)
+			if varVialations[i].variableSetName != "" {
+				fmt.Println("Orgnization:", varVialations[i].orgName, ",variable set:", varVialations[i].variableSetName, ",category:", varVialations[i].category, ",Variable:", cc+varVialations[i].varName+color.Reset)
+			} else {
+				fmt.Println("Orgnization:", varVialations[i].orgName, ",workspace:", varVialations[i].workspaceName, ",category:", varVialations[i].category, ",Variable:", cc+varVialations[i].varName+color.Reset)
+			}
 		}
 
 		fmt.Println()
 		fmt.Printf("Total number of Orgnisations scanned: %d\n", numOrg)
 		fmt.Printf("Total number of Workspaces scanned: %d\n", numWorkspace)
 		fmt.Printf("Total number of Variables scanned: %d\n", numVar)
+		fmt.Printf("Total number of Variable Sets scanned: %d\n", numVarSet)
+		fmt.Printf("Total number of Variable Set Variables scanned: %d\n", numVarSetVar)
 
 		if fixCritical {
 			if numCriticalFix > 0 {
