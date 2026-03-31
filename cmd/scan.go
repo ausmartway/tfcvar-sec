@@ -357,7 +357,7 @@ func scan(hostname string, token string) {
 				})
 
 				if err != nil {
-					log.Fatal(err)
+					break
 				} else {
 					fmt.Print(".")
 					numWorkspace = numWorkspace + len(ws.Items)
@@ -366,7 +366,7 @@ func scan(hostname string, token string) {
 						variables, _ := client.Variables.List(ctx, workspaces.ID, &tfe.VariableListOptions{
 							ListOptions: tfe.ListOptions{
 								PageNumber: 1,
-								PageSize:   1000,
+								PageSize:   100,
 							},
 						})
 						//for each variable, see if it is in the list but not marked sensitive
@@ -435,18 +435,18 @@ func scan(hostname string, token string) {
 					},
 				})
 				if err != nil {
-					log.Fatal(err)
+					break
 				}
 				numVarSet = numVarSet + len(vsl.Items)
 				for _, vs := range vsl.Items {
 					vsVars, err := client.VariableSetVariables.List(ctx, vs.ID, &tfe.VariableSetVariableListOptions{
 						ListOptions: tfe.ListOptions{
 							PageNumber: 1,
-							PageSize:   1000,
+							PageSize:   100,
 						},
 					})
 					if err != nil {
-						log.Fatal(err)
+						continue
 					}
 					numVarSetVar = numVarSetVar + len(vsVars.Items)
 					for _, vsVar := range vsVars.Items {
